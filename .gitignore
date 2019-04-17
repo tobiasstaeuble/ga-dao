@@ -30,3 +30,14 @@
 *.exe
 *.out
 *.app
+
+# Output directory contents
+output/*
+!output/.gitkeep
+
+# Bin directory contents
+bin/*
+!bin/Makefile
+
+# __pycache__
+visualization/__pycache__
