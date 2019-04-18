@@ -37,7 +37,7 @@ output/*
 
 # Bin directory contents
 bin/*
-!bin/Makefile
+!bin/CMakeLists.txt
 
 # __pycache__
 visualization/__pycache__
