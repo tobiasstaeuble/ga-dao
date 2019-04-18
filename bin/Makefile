@@ -23,7 +23,7 @@ SRCDIR = ../src
 
 # Objects
 #------------
-OBJ = mingenome.o test.o 
+OBJ = mingenome.o mingafactoryparams.o utils.o test.o mingafactory.o
 
 all: test #debug
 

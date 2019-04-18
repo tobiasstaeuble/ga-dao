@@ -1,9 +1,16 @@
 #ifndef MINGAFACTORY_H
 #define MINGAFACTORY_H 
 
+#include <mogal/gafactorysingleobjective.h>
+#include <mogal/genome.h>
+#include <mogal/geneticalgorithm.h>
+
 #include "mingafactoryparams.h"
 #include "simplerndgen.h"
 #include "mingenome.h"
+#include "test.h"
+#include "utils.h"
+#include <iostream>
 
 class MinGAFactory : public mogal::GAFactorySingleObjective
 {

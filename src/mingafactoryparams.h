@@ -1,6 +1,10 @@
 #ifndef MINGAFACTORYPARAMS_H
 #define MINGAFACTORYPARAMS_H
 
+#include <mogal/gafactorysingleobjective.h>
+#include <mogal/genome.h>
+#include <mogal/geneticalgorithm.h>
+
 class MinGAFactoryParams : public mogal::GAFactoryParams
 {
 public:
