@@ -2,19 +2,22 @@
 #define MINGENOME_H 
 
 #include <Eigen/Dense>
+#include "mingafactory.h"
 #include "constants.h"
 #include "globals.h"
 
 using namespace Eigen;
 using namespace std;
 
+class MinGAFactory;
+
 
 class MinGenome : public mogal::Genome
 {
 public:
-	MinGenome();
-	MinGenome(float bw[]);
-	MinGenome(VectorXf bw);
+	MinGenome(MinGAFactory *pFactory);
+	MinGenome(float bw[], MinGAFactory *pFactory);
+	MinGenome(VectorXf bw, MinGAFactory *pFactory);
 	~MinGenome();
 
 	bool calculateFitness();
@@ -32,6 +35,10 @@ private:
 	int beamlets;
 	VectorXf bixelweights;
 	double m_fitness;
+	MinGAFactory *m_pFactory;
+
+	friend class MinGAFactory;
+
 };
 
 #endif

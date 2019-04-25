@@ -33,20 +33,23 @@ mogal::Genome *MinGAFactory::createNewGenome() const
 	for (int i = 0; i < BEAMLETS*ANGLES; i++) {
 		bw[i] = 1;
 	}
-	return new MinGenome(bw);
+	return new MinGenome(bw, (MinGAFactory *)this);
 
 }
 
 size_t MinGAFactory::getMaximalGenomeSize() const
 {
+	return sizeof(float)*BEAMLETS*ANGLES; // for bixelweights vector
+
 	// This function is only needed if you'll be using distributed calculation.
 	// In that case, it should return the maximum number of bytes a genome will
 	// need for serialization.
-	return 0;
+	// return 0;
 }
 
 size_t MinGAFactory::getMaximalFitnessSize() const
 {
+	return sizeof(double);
 	// This function is only needed if you'll be using distributed calculation.
 	// In that case, it should return the maximum number of bytes the fitness 
 	// measure(s) need for serialization.
@@ -56,43 +59,79 @@ size_t MinGAFactory::getMaximalFitnessSize() const
 bool MinGAFactory::writeGenome(serut::SerializationInterface &si, const mogal::Genome *pGenome) const
 {
 	// This is only needed for distributed calculation
-	setErrorString("Serialization is not implemented yet");
-	return false;
+	const MinGenome *pMinGenome = (const MinGenome *)pGenome;	
+
+	VectorXf bw = pMinGenome->getBixelweights();
+
+	std::vector<float> vec(bw.data(), bw.data() + bw.rows() * bw.cols());
+
+	if (!si.writeFloats(vec))
+	{
+		setErrorString("Couldn't write genome bixelweights");
+		return false;
+	}
+
+	return true;
 }
 
 bool MinGAFactory::writeGenomeFitness(serut::SerializationInterface &si, const mogal::Genome *pGenome) const
 {
 	// This is only needed for distributed calculation
-	setErrorString("Serialization is not implemented yet");
-	return false;
+	const MinGenome *pMinGenome = (const MinGenome *)pGenome;	
+
+	if (!si.writeDouble(pMinGenome->m_fitness))
+	{
+		setErrorString("Couldn't write genome fitness");
+		return false;
+	}
+	return true;
 }
 
 bool MinGAFactory::writeCommonGenerationInfo(serut::SerializationInterface &si) const
 {
 	// This is only needed for distributed calculation
-	setErrorString("Serialization is not implemented yet");
-	return false;
+	// setErrorString("Serialization is not implemented yet");
+	return true;
 }
 
 bool MinGAFactory::readGenome(serut::SerializationInterface &si, mogal::Genome **pGenome) const
 {
+
 	// This is only needed for distributed calculation
-	setErrorString("Serialization is not implemented yet");
-	return false;
+	std::vector<float> bw(getMaximalGenomeSize()/sizeof(float));
+	if (!si.readFloats(bw))
+	{
+		setErrorString("Couldn't read genome bixelweights");
+		return false;
+	}
+	float* ptr = &bw[0];
+	Eigen::Map<Eigen::VectorXf> vec(ptr, getMaximalGenomeSize()/sizeof(float));
+	*pGenome = new MinGenome(vec, (MinGAFactory *)this);
+	return true;
 }
 
 bool MinGAFactory::readGenomeFitness(serut::SerializationInterface &si, mogal::Genome *pGenome) const
 {
 	// This is only needed for distributed calculation
-	setErrorString("Serialization is not implemented yet");
-	return false;
+	double fitness;
+
+	if (!si.readDouble(&fitness))
+	{
+		setErrorString("Couldn't read genome fitness");
+		return false;
+	}
+
+	MinGenome *pMinGenome = (MinGenome *)pGenome;
+	pMinGenome->m_fitness = fitness;
+
+	return true;
 }
 
 bool MinGAFactory::readCommonGenerationInfo(serut::SerializationInterface &si)
 {
 	// This is only needed for distributed calculation
-	setErrorString("Serialization is not implemented yet");
-	return false;
+	// setErrorString("Serialization is not implemented yet");
+	return true;
 }
 
 void MinGAFactory::onGeneticAlgorithmStep(int generation, bool *generationInfoChanged, bool *pStopAlgorithm)
@@ -111,7 +150,7 @@ void MinGAFactory::onGeneticAlgorithmStep(int generation, bool *generationInfoCh
 		std::cout << "  " << pGenome->getFitnessDescription() << std::endl;
 	}
 
-	if (generation >= 2000)
+	if (generation >= GENERATIONS)
 		*pStopAlgorithm = true;
 
 	if (generation % 10 == 0) {

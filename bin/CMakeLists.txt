@@ -4,7 +4,7 @@ project(ga-dao)
 set(VERSION 0.1.0)
 
 set(CMAKE_C_COMPILER "/usr/bin/g++")
-set(CMAKE_CXX_COMPILER "/usr/bin/g++")
+set(CMAKE_CXX_COMPILER "/usr/bin/mpicxx")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu++11 -I ../lib/eigen/")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=gnu++11 -I ../lib/eigen/")
 

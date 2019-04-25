@@ -5,6 +5,7 @@
 #include <mogal/genome.h>
 #include <mogal/geneticalgorithm.h>
 
+#include "constants.h"
 #include "mingafactoryparams.h"
 #include "simplerndgen.h"
 #include "mingenome.h"

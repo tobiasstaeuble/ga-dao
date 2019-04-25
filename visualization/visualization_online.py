@@ -89,7 +89,7 @@ def animate(i):
 	#dose_imb.autoscale()
 
 
-anim = anim.FuncAnimation(fig, animate, frames=len(relevantFilesDose), interval=100, repeat=False)
+anim = anim.FuncAnimation(fig, animate, frames=len(relevantFilesDose), interval=1000, repeat=False)
 #dataMinDoseMatrix = np.transpose(np.reshape(dataMinDoseMatrix, np.shape(dataCT)[::-1]))
 #dataVOIMatrix = np.transpose(np.reshape(dataVOIMatrix, np.shape(dataCT)[::-1]))
 

@@ -16,7 +16,7 @@ using namespace std;
 
 // Genome implementation
 
-MinGenome::MinGenome()
+MinGenome::MinGenome(MinGAFactory *pFactory)
 {
 
 	//printf( "%6.4f", dij[0][0] );
@@ -27,21 +27,27 @@ MinGenome::MinGenome()
 	for (int i = 0; i < BEAMLETS*ANGLES; i++) {
 		bixelweights(i) = 1;
 	}
+
+	m_pFactory = pFactory;
 }
 
-MinGenome::MinGenome(float bw[BEAMLETS])
+MinGenome::MinGenome(float bw[BEAMLETS], MinGAFactory *pFactory)
 {
 	bixelweights.resize(BEAMLETS*ANGLES,1);
 
 	for (int i = 0; i < BEAMLETS*ANGLES; i++) {
 		bixelweights(i) = bw[i];
 	}
+
+	m_pFactory = pFactory;
 }
 
-MinGenome::MinGenome(VectorXf bw)
+MinGenome::MinGenome(VectorXf bw, MinGAFactory *pFactory)
 {
 	bixelweights.resize(BEAMLETS*ANGLES,1);
 	bixelweights = Map<VectorXf>(bw.data(), BEAMLETS*ANGLES);
+
+	m_pFactory = pFactory;
 }
 
 MinGenome::~MinGenome()
@@ -127,18 +133,18 @@ mogal::Genome *MinGenome::reproduce(const mogal::Genome *pGenome) const
 			newBWs(bwi) = bixelweights(bwi);
 		}
 	}
-		pNewGenome = new MinGenome(newBWs);
+		pNewGenome = new MinGenome(newBWs, m_pFactory);
 	}
 	else if (randomNumber < 0.98)
-		pNewGenome = new MinGenome(bixelweights);
+		pNewGenome = new MinGenome(bixelweights, m_pFactory);
 	else
-		pNewGenome = new MinGenome();
+		pNewGenome = new MinGenome(m_pFactory);
 	return pNewGenome;
 }
 
 mogal::Genome *MinGenome::clone() const
 {
-	MinGenome *pNewGenome = new MinGenome(bixelweights);
+	MinGenome *pNewGenome = new MinGenome(bixelweights, m_pFactory);
 
 	pNewGenome->m_fitness = m_fitness;
 	return pNewGenome;

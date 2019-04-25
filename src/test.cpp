@@ -1,6 +1,6 @@
 #include <mogal/gafactorysingleobjective.h>
 #include <mogal/genome.h>
-#include <mogal/geneticalgorithm.h>
+#include <mogal/mpigeneticalgorithm.h>
 #include <serut/serializationinterface.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <mpi.h>
 #include "constants.h"
 #include "globals.h"
 #include "mingenome.h"
@@ -24,12 +25,22 @@ int maxDose[DIM_Y][DIM_X];
 int voiWeights[VOIS] = {0};
 int voiData[DIM_Y][DIM_X];
 
-int main(void)
+int main(int argc, char *argv[])
 {
-	mogal::GeneticAlgorithm ga;
-	MinGAFactory gaFactory;
 
-	srand(time(0));
+	// MPI setup
+	int worldSize, myRank;
+
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size( MPI_COMM_WORLD, &worldSize);
+
+	if (worldSize <= 1)
+	{
+		std::cerr << "Need more than one process to be able to work" << std::endl;
+		MPI_Abort(MPI_COMM_WORLD, -1);
+	}
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
 	// load data from csv (dij, vois)
 
@@ -96,9 +107,16 @@ int main(void)
 		}
 	}
 
-	for (int weights = 0; weights < VOIS; ++ weights)
-	{
-		std::cout << voiWeights[weights] << std::endl;
+	if (myRank == 0) {
+		std::cout << "Preparing data and MPI environment..." << std::endl;
+		std::cout << "MPI processes: " << worldSize << std::endl;
+		std::cout << "Genomes per generation: " << NUM_GENOMES << std::endl;
+		std::cout << "Generations: " << GENERATIONS << std::endl;
+
+		for (int weights = 0; weights < VOIS; ++ weights)
+		{
+			std::cout << "VOI (" << std::to_string(weights) << ") weight: " << voiWeights[weights] << std::endl;
+		}
 	}
 
 	// define objectives
@@ -132,43 +150,51 @@ int main(void)
 		}
 	}
 
-	// instantiate factoryparams
+	// algorithm and factory
+	mogal::MPIGeneticAlgorithm ga;
+	MinGAFactory gaFactory;
+
+	// time(0) is seconds since epoch, bad for MPI as we start all processes at same time
+	srand(time(0) + myRank);
+
+	// time(0) is in
+
+	// instantiate and init factoryparams
 	MinGAFactoryParams factoryParams;
+	gaFactory.init(&factoryParams);
 
-	if (!gaFactory.init(&factoryParams))
+	// rank 0 vs other ranks
+	if (myRank == 0)
 	{
-		std::cerr << gaFactory.getErrorString() << std::endl;
-		return -1;
+		std::cout << "Rank " << myRank << " starting..." << std::endl;
+		if (!ga.runMPI(gaFactory, NUM_GENOMES))
+		{
+			std::cerr << ga.getErrorString() << std::endl;
+			MPI_Abort(MPI_COMM_WORLD, -1);
+		}
+
+		// finished calculation, get best genomes
+		std::list<mogal::Genome *> bestGenomes;
+
+		ga.getBestGenomes(bestGenomes);
+
+		std::list<mogal::Genome *>::const_iterator it;
+
+		ga.getBestGenomes(bestGenomes);
+		Utils::printAndSaveBestGenomes(bestGenomes.front(), ga.getCurrentGeneration());
+		Utils::saveDoseMatrix(bestGenomes.front(), ga.getCurrentGeneration());
+
+	} else {
+		std::cout << "Rank " << myRank << " starting..." << std::endl;
+		if (!ga.runMPIHelper(gaFactory))
+		{
+			std::cerr << ga.getErrorString() << std::endl;
+			MPI_Abort(MPI_COMM_WORLD, -1);
+		}
 	}
 
-	if (!ga.run(gaFactory, 128))
-	{
-		std::cerr << ga.getErrorString() << std::endl;
-		return -1;
-	}
+	MPI_Finalize();
 
-	std::list<mogal::Genome *> bestGenomes;
-	ga.getBestGenomes(bestGenomes);
-	Utils::printAndSaveBestGenomes(bestGenomes.front(), ga.getCurrentGeneration());
-	Utils::saveDoseMatrix(bestGenomes.front(), ga.getCurrentGeneration());
-	/*
-	std::list<mogal::Genome *> bestGenomes;
-	std::list<mogal::Genome *>::const_iterator it;
-
-	ga.getBestGenomes(bestGenomes);
-
-	std::cout << "Best genomes: " << std::endl;
-	
-	for (it = bestGenomes.begin() ; it != bestGenomes.end() ; it++)
-	{
-		const mogal::Genome *pGenome = *it;
-		MinGenome *mGenome = (MinGenome *) *it;
-		
-		std::cout << "  " << pGenome->getFitnessDescription() << std::endl;
-		std::cout << "  " << mGenome->getBixelweightsDescription() << std::endl;
-		mGenome->writeToCSVFile("../problemset/newbw.csv", mGenome->getBixelweights());
-	}
-	*/
 	return 0;
 }
 
