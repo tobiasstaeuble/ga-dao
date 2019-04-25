@@ -61,7 +61,7 @@ ax.imshow(dataCT, interpolation='none', cmap='gray')
 # dose directly
 dataDoseMatrix = np.genfromtxt(pathOutputDir + relevantFilesDose[0], delimiter=',')
 dataDoseMatrix = np.transpose(np.reshape(dataDoseMatrix, np.shape(dataCT)[::-1]))
-dose_imm = ax.imshow(dataDoseMatrix, cmap='jet', interpolation='none', alpha=0.3)
+dose_imm = ax.imshow(dataDoseMatrix, cmap='jet', interpolation='none', alpha=0.5)
 
 
 # dose via bw
@@ -89,7 +89,7 @@ def animate(i):
 	#dose_imb.autoscale()
 
 
-anim = anim.FuncAnimation(fig, animate, frames=len(relevantFilesDose), interval=1000, repeat=False)
+anim = anim.FuncAnimation(fig, animate, frames=len(relevantFilesDose), interval=150, repeat=False)
 #dataMinDoseMatrix = np.transpose(np.reshape(dataMinDoseMatrix, np.shape(dataCT)[::-1]))
 #dataVOIMatrix = np.transpose(np.reshape(dataVOIMatrix, np.shape(dataCT)[::-1]))
 

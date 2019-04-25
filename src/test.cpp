@@ -19,11 +19,7 @@
 #include "test.h"
 #include "utils.h"
 
-float dij[DIJ_Y][DIJ_X];
-int minDose[DIM_Y][DIM_X];
-int maxDose[DIM_Y][DIM_X];
-int voiWeights[VOIS] = {0};
-int voiData[DIM_Y][DIM_X];
+
 
 int main(int argc, char *argv[])
 {
@@ -42,70 +38,12 @@ int main(int argc, char *argv[])
 
 	MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-	// load data from csv (dij, vois)
 
-	std::ifstream file(INPUT_PATH + IN_DIJ);
-
-	for(int row = 0; row < DIJ_X; ++row)
-	{
-	    std::string line;
-	    std::getline(file, line);
-
-	    if ( !file.good() ) 
-	        break;
-
-	    std::stringstream iss(line);
-
-	    for (int col = 0; col < DIJ_Y; ++col)
-	    {
-	        std::string val;
-	        std::getline(iss, val, ',');
-	        if ( !iss.good() ) 
-	            break;
-	        std::stringstream convertor(val);
-	        convertor >> dij[col][row];
-	    }
-	}
-	
-	file.close();
-	file.clear();
-
-
-	file.open(INPUT_PATH + IN_VOI);
-	
-
-	for(int row = 0; row < DIM_X; ++row)
-	{
-	    std::string line;
-	    std::getline(file, line);
-	    if ( !file.good() ) 
-	        break;
-
-	    std::stringstream iss(line);
-
-	    for (int col = 0; col < DIM_Y; ++col)
-	    {
-	        std::string val;
-	        std::getline(iss, val, ',');
-	        if ( !iss.good() ) 
-	            break;
-	        std::stringstream convertor(val);
-	        convertor >> voiData[col][row];
-	    }
-	}
-
-	file.close();
-	file.clear();
-
-	// calculate relative VOI weights
-	for (int row = 0; row < DIM_X; ++row)
-	{
-		for (int col = 0; col < DIM_Y-1; ++col)
-		{
-			//std::cout << voiData[row][col] << std::endl;
-			voiWeights[voiData[col][row]] += 1;
-		}
-	}
+	// does it make sense to make this static?
+	Utils util;
+	util.loadData();
+	util.calculateRelativeWeights();
+	util.defineObjectives();
 
 	if (myRank == 0) {
 		std::cout << "Preparing data and MPI environment..." << std::endl;
@@ -119,36 +57,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	// define objectives
-	for(int row = 0; row < DIM_X; ++row)
-	{
-		for (int col = 0; col < DIM_Y; ++col)
-		{
-			// tumor (6)
-			if (voiData[col][row] == 6)
-			{
-				minDose[col][row] = 50;
-				maxDose[col][row] = 70;
-			}
-			// normal tissue (1) & lungs (2,3) & spinal cord (4) & esophagus (5)
-			if (voiData[col][row] >= 1 && voiData[col][row] <= 5)
-			{
-				maxDose[col][row] = 10;
-			}
 
-			// non-tissue surrounding area = ignore overdosing
-			if (voiData[col][row] == 0) {
-				maxDose[col][row] = 500;
-			}
-
-
-			// spinal cord
-			//if (voiData[row][col] == 4)
-			//{
-			//	maxDose[row][col] = 8;
-			//}
-		}
-	}
 
 	// algorithm and factory
 	mogal::MPIGeneticAlgorithm ga;
