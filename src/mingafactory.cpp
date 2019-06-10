@@ -29,8 +29,8 @@ const mogal::GAFactoryParams *MinGAFactory::getCurrentParameters() const
 
 mogal::Genome *MinGAFactory::createNewGenome() const
 {
-	float bw[BEAMLETS*ANGLES];
-	for (int i = 0; i < BEAMLETS*ANGLES; i++) {
+	float bw[BEAMLETS*NUM_ANGLES];
+	for (int i = 0; i < BEAMLETS*NUM_ANGLES; i++) {
 		bw[i] = 1;
 	}
 	return new MinGenome(bw, (MinGAFactory *)this);
@@ -39,7 +39,7 @@ mogal::Genome *MinGAFactory::createNewGenome() const
 
 size_t MinGAFactory::getMaximalGenomeSize() const
 {
-	return sizeof(float)*BEAMLETS*ANGLES; // for bixelweights vector
+	return sizeof(float)*BEAMLETS*NUM_ANGLES; // for bixelweights vector
 
 	// This function is only needed if you'll be using distributed calculation.
 	// In that case, it should return the maximum number of bytes a genome will

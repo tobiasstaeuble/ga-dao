@@ -5,6 +5,7 @@
 #include "mingafactory.h"
 #include "constants.h"
 #include "globals.h"
+#include "angle.h"
 
 using namespace Eigen;
 using namespace std;
@@ -36,6 +37,7 @@ private:
 	VectorXf bixelweights;
 	double m_fitness;
 	MinGAFactory *m_pFactory;
+	Angle angles[NUM_ANGLES];
 
 	friend class MinGAFactory;
 

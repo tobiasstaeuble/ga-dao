@@ -21,10 +21,10 @@ MinGenome::MinGenome(MinGAFactory *pFactory)
 
 	//printf( "%6.4f", dij[0][0] );
 
-	bixelweights.resize(BEAMLETS*ANGLES,1);
+	bixelweights.resize(BEAMLETS*NUM_ANGLES,1);
 
 	//bixelweights.resize(beamlets, 1);
-	for (int i = 0; i < BEAMLETS*ANGLES; i++) {
+	for (int i = 0; i < BEAMLETS*NUM_ANGLES; i++) {
 		bixelweights(i) = 1;
 	}
 
@@ -33,9 +33,9 @@ MinGenome::MinGenome(MinGAFactory *pFactory)
 
 MinGenome::MinGenome(float bw[BEAMLETS], MinGAFactory *pFactory)
 {
-	bixelweights.resize(BEAMLETS*ANGLES,1);
+	bixelweights.resize(BEAMLETS*NUM_ANGLES,1);
 
-	for (int i = 0; i < BEAMLETS*ANGLES; i++) {
+	for (int i = 0; i < BEAMLETS*NUM_ANGLES; i++) {
 		bixelweights(i) = bw[i];
 	}
 
@@ -44,8 +44,8 @@ MinGenome::MinGenome(float bw[BEAMLETS], MinGAFactory *pFactory)
 
 MinGenome::MinGenome(VectorXf bw, MinGAFactory *pFactory)
 {
-	bixelweights.resize(BEAMLETS*ANGLES,1);
-	bixelweights = Map<VectorXf>(bw.data(), BEAMLETS*ANGLES);
+	bixelweights.resize(BEAMLETS*NUM_ANGLES,1);
+	bixelweights = Map<VectorXf>(bw.data(), BEAMLETS*NUM_ANGLES);
 
 	m_pFactory = pFactory;
 }
@@ -56,6 +56,20 @@ MinGenome::~MinGenome()
 
 bool MinGenome::calculateFitness()
 {
+
+
+	for (int i = 0; i < NUM_ANGLES; ++i)
+	{
+		for (int j = 0; j < angles[i].configurations.size(); ++j) 
+		{
+			for (int k = 0; k < BEAMLETS-1; ++k)
+			{
+				if (angles[i].configurations[j].LL <= k && angles[i].configurations[j].RL > k) {
+					bixelweights[i*NUM_ANGLES + k] += angles[i].configurations[j].time;
+				}
+			} 
+		}
+	}
 	Map<MatrixXf> dijMatrix(*dij, DIJ_X, DIJ_Y);
 	//std::cout << dijMatrix << std::endl;
 	// std::cout << "dijMatrix: " << dijMatrix.size() << std::endl;
@@ -122,7 +136,7 @@ mogal::Genome *MinGenome::reproduce(const mogal::Genome *pGenome) const
 	// randomly select some bixelweights
 
 	if (randomNumber < 0.1) {
-		for(int bwi = 0; bwi < ANGLES*BEAMLETS; ++bwi)
+		for(int bwi = 0; bwi < NUM_ANGLES*BEAMLETS; ++bwi)
 		{
 			double rng = (1.0*((double)rand()/(RAND_MAX + 1.0)));
 			if (rng < 0.5) {
@@ -157,7 +171,7 @@ void MinGenome::mutate()
 	//std::cout << smallRandomNumber << std::endl;
 	if (randomNumber < 0.05) 
 	{
-		for(int row = 0; row < ANGLES*BEAMLETS; ++row)
+		for(int row = 0; row < NUM_ANGLES*BEAMLETS; ++row)
 		{
 			float smallRandomNumber = (rand() / double(RAND_MAX) - 0.5)*2; // -1 exclusive to +1 exclusive
 			smallRandomNumber /= 5;
