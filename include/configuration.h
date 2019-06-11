@@ -2,6 +2,7 @@
 #define CONFIGURATION_H
 
 #include <Eigen/Dense>
+#include "constants.h"
 
 using namespace Eigen;
 using namespace std;
@@ -14,6 +15,7 @@ public:
 
 	void updateConfiguration(int LL, int RL, float time);
 	void updateConfiguration(int LL, int RL, float time, float fitness);
+	void shuffleConfiguration();
 
 	int LL, RL;
 	float time;

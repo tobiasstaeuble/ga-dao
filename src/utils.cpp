@@ -1,4 +1,5 @@
 #include <mogal/genome.h>
+#include <vector>
 #include <iostream>
 #include <iomanip>
 #include "constants.h"
@@ -6,7 +7,6 @@
 #include "mingenome.h"
 #include "utils.h"
 #include "angle.h"
-#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -41,10 +41,6 @@ void Utils::saveDoseMatrix(mogal::Genome* bestGenome, int generation)
 
 bool Utils::loadData()
 {
-	for(int i = 0; i < NUM_ANGLES; i++) {
-		//angles[i] = new Angle(i);
-	}
-
 	// load data from csv (dij, vois)
 
 	std::ifstream file(INPUT_PATH + IN_DIJ);

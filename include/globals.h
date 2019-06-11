@@ -3,6 +3,7 @@
 
 #include "constants.h"
 #include "angle.h"
+#include <vector>
 
 extern float dij[DIJ_Y][DIJ_X];
 extern int minDose[DIM_Y][DIM_X];

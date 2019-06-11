@@ -29,17 +29,18 @@ const mogal::GAFactoryParams *MinGAFactory::getCurrentParameters() const
 
 mogal::Genome *MinGAFactory::createNewGenome() const
 {
-	float bw[BEAMLETS*NUM_ANGLES];
-	for (int i = 0; i < BEAMLETS*NUM_ANGLES; i++) {
-		bw[i] = 1;
+	std::vector<Angle> angles;
+
+	for(int i = 0; i < NUM_ANGLES; i++) {
+		angles.push_back(Angle(i, 360/NUM_ANGLES*i));
 	}
-	return new MinGenome(bw, (MinGAFactory *)this);
+	return new MinGenome(angles, (MinGAFactory *)this);
 
 }
 
 size_t MinGAFactory::getMaximalGenomeSize() const
 {
-	return sizeof(float)*BEAMLETS*NUM_ANGLES; // for bixelweights vector
+	return sizeof(float)*NUM_CONFIGS*NUM_ANGLES*3; // for angles matrix
 
 	// This function is only needed if you'll be using distributed calculation.
 	// In that case, it should return the maximum number of bytes a genome will
@@ -61,13 +62,11 @@ bool MinGAFactory::writeGenome(serut::SerializationInterface &si, const mogal::G
 	// This is only needed for distributed calculation
 	const MinGenome *pMinGenome = (const MinGenome *)pGenome;	
 
-	VectorXf bw = pMinGenome->getBixelweights();
+	std::vector<float> angleData = pMinGenome->serializeAngles();
 
-	std::vector<float> vec(bw.data(), bw.data() + bw.rows() * bw.cols());
-
-	if (!si.writeFloats(vec))
+	if (!si.writeFloats(angleData))
 	{
-		setErrorString("Couldn't write genome bixelweights");
+		setErrorString("Couldn't write genome data");
 		return false;
 	}
 
@@ -98,15 +97,30 @@ bool MinGAFactory::readGenome(serut::SerializationInterface &si, mogal::Genome *
 {
 
 	// This is only needed for distributed calculation
-	std::vector<float> bw(getMaximalGenomeSize()/sizeof(float));
-	if (!si.readFloats(bw))
+	std::vector<float> angleData(getMaximalGenomeSize()/sizeof(float));
+	if (!si.readFloats(angleData))
 	{
-		setErrorString("Couldn't read genome bixelweights");
+		setErrorString("Couldn't read genome data");
 		return false;
 	}
-	float* ptr = &bw[0];
-	Eigen::Map<Eigen::VectorXf> vec(ptr, getMaximalGenomeSize()/sizeof(float));
-	*pGenome = new MinGenome(vec, (MinGAFactory *)this);
+	float* ptr = &angleData[0];
+
+	// deserialize angle data
+	std::vector<Angle> nAngles;
+	nAngles.resize(NUM_ANGLES);
+	//std::cout << "reading: " << std::endl;
+	//for (auto i: angleData)
+ 	//	std::cout << i << ' ';
+	for (int i = 0; i < NUM_ANGLES; i++) 
+	{
+		for (int j = 0; j < NUM_CONFIGS; j++)
+		{
+			nAngles[i].configurations[j].LL = static_cast<int>(angleData[i*NUM_CONFIGS*3+j*3]);
+			nAngles[i].configurations[j].RL = static_cast<int>(angleData[i*NUM_CONFIGS*3+j*3+1]);
+			nAngles[i].configurations[j].time = angleData[i*NUM_CONFIGS*3+j*3+2];
+		}
+	}
+	*pGenome = new MinGenome(nAngles, (MinGAFactory *)this);
 	return true;
 }
 
