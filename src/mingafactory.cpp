@@ -160,7 +160,14 @@ void MinGAFactory::onGeneticAlgorithmStep(int generation, bool *generationInfoCh
 	for (it = bestGenomes.begin() ; it != bestGenomes.end() ; it++)
 	{
 		const mogal::Genome *pGenome = *it;
-		
+
+		// recalculate Fitness again, because bixelweights vector again because:
+		// - bixelweights is not being exchanged between processes (it is derived)
+		// - no guarantee that calculateFitness is called before this onGeneticAlgorithmStep
+		// this can maybe be optimized..
+		MinGenome *pMinGenome = (MinGenome *)pGenome;
+		pMinGenome->calculateFitness();
+
 		std::cout << "  " << pGenome->getFitnessDescription() << std::endl;
 	}
 
