@@ -23,6 +23,7 @@ public:
 
 	bool calculateFitness();
 	bool isFitterThan(const mogal::Genome *pGenome) const;
+	void setActiveFitnessComponent(int i);
 	Genome *reproduce(const mogal::Genome *pGenome) const;
 	mogal::Genome *clone() const;
 	void mutate();
@@ -37,7 +38,8 @@ public:
 private:
 	int beamlets;
 	VectorXf bixelweights;
-	double m_fitness;
+	double m_fitness[2];
+	int m_activeFitness;
 	MinGAFactory *m_pFactory;
 	std::vector<Angle> angles;
 	friend class MinGAFactory;

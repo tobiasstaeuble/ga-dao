@@ -1,7 +1,7 @@
 #ifndef MINGAFACTORY_H
 #define MINGAFACTORY_H 
 
-#include <mogal/gafactorysingleobjective.h>
+#include <mogal/gafactorymultiobjective.h>
 #include <mogal/genome.h>
 #include <mogal/geneticalgorithm.h>
 
@@ -13,7 +13,7 @@
 #include "utils.h"
 #include <iostream>
 
-class MinGAFactory : public mogal::GAFactorySingleObjective
+class MinGAFactory : public mogal::GAFactoryMultiObjective
 {
 public:
 	MinGAFactory();
@@ -32,6 +32,7 @@ public:
 	mogal::Genome *createNewGenome() const;
 	size_t getMaximalGenomeSize() const;
 	size_t getMaximalFitnessSize() const;
+	size_t getNumberOfFitnessComponents() const;
 	bool writeGenome(serut::SerializationInterface &si, const mogal::Genome *pGenome) const;
 	bool writeGenomeFitness(serut::SerializationInterface &si, const mogal::Genome *pGenome) const;
 	bool writeCommonGenerationInfo(serut::SerializationInterface &si) const;
@@ -43,6 +44,7 @@ public:
 	void onGeneticAlgorithmStart();
 	void onGeneticAlgorithmStop();
 	void onSortedPopulation(const std::vector<mogal::GenomeWrapper> &population);
+	mogal::Genome *selectPreferredGenome(const std::list<mogal::Genome *> &bestGenomes) const;
 private:
 	MinGAFactoryParams m_factoryParams;
 	SimpleRndGen m_rndGen;

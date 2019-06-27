@@ -40,17 +40,25 @@ MinGenome::~MinGenome()
 {
 }
 
+void MinGenome::setActiveFitnessComponent(int i)
+{
+	m_activeFitness = i;
+}
+
 bool MinGenome::calculateFitness()
 {
 	for (int i = 0; i < NUM_ANGLES*BEAMLETS; ++i) 
 	{
 		bixelweights[i] = 0;
 	} 
+	
+	double tmp = 0;
 
 	for (int i = 0; i < NUM_ANGLES; ++i)
 	{
 		for (int j = 0; j < angles[i].configurations.size(); ++j) 
 		{
+			tmp += angles[i].configurations[j].time * 100;
 			for (int k = 0; k < BEAMLETS-1; ++k)
 			{
 				if (angles[i].configurations[j].LL <= k && angles[i].configurations[j].RL > k) {
@@ -102,8 +110,8 @@ bool MinGenome::calculateFitness()
 	}
 
 	//std::cout << "Obj value: " << obj << std::endl;
-	m_fitness = obj;
-	
+	m_fitness[0] = obj;
+	m_fitness[1] = obj-tmp;
 	return true;
 }
 
@@ -111,7 +119,7 @@ bool MinGenome::isFitterThan(const mogal::Genome *pGenome) const
 {
 	const MinGenome *pMinGenome = (const MinGenome *)pGenome;
 
-	if (m_fitness < pMinGenome->m_fitness)
+	if (m_fitness[m_activeFitness] < pMinGenome->m_fitness[m_activeFitness])
 		return true;
 	return false;
 }
@@ -161,7 +169,8 @@ mogal::Genome *MinGenome::clone() const
 {
 	MinGenome *pNewGenome = new MinGenome(angles, m_pFactory);
 
-	pNewGenome->m_fitness = m_fitness;
+	pNewGenome->m_fitness[0] = m_fitness[0];
+	pNewGenome->m_fitness[1] = m_fitness[1];
 	return pNewGenome;
 }
 
@@ -190,8 +199,7 @@ std::string MinGenome::getFitnessDescription() const
 {
 	char str[256];
 
-	sprintf(str, "%g ", m_fitness);
-
+	sprintf(str, "Fitness : %g %g ", m_fitness[0], m_fitness[1] );
 	return std::string(str);
 }
 

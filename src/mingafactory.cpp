@@ -50,11 +50,16 @@ size_t MinGAFactory::getMaximalGenomeSize() const
 
 size_t MinGAFactory::getMaximalFitnessSize() const
 {
-	return sizeof(double);
+	return sizeof(double)*2;
 	// This function is only needed if you'll be using distributed calculation.
 	// In that case, it should return the maximum number of bytes the fitness 
 	// measure(s) need for serialization.
 	return 0;
+}
+
+size_t MinGAFactory::getNumberOfFitnessComponents() const
+{
+	return 2;
 }
 
 bool MinGAFactory::writeGenome(serut::SerializationInterface &si, const mogal::Genome *pGenome) const
@@ -77,8 +82,8 @@ bool MinGAFactory::writeGenomeFitness(serut::SerializationInterface &si, const m
 {
 	// This is only needed for distributed calculation
 	const MinGenome *pMinGenome = (const MinGenome *)pGenome;	
-
-	if (!si.writeDouble(pMinGenome->m_fitness))
+	std::vector<double> fitnessData (std::begin(pMinGenome->m_fitness), std::end(pMinGenome->m_fitness));
+	if (!si.writeDoubles(fitnessData))
 	{
 		setErrorString("Couldn't write genome fitness");
 		return false;
@@ -128,15 +133,15 @@ bool MinGAFactory::readGenomeFitness(serut::SerializationInterface &si, mogal::G
 {
 	// This is only needed for distributed calculation
 	double fitness;
-
-	if (!si.readDouble(&fitness))
+	std::vector<double> fitnessData (getMaximalFitnessSize()/sizeof(double));
+	if (!si.readDoubles(fitnessData))
 	{
 		setErrorString("Couldn't read genome fitness");
 		return false;
 	}
 
 	MinGenome *pMinGenome = (MinGenome *)pGenome;
-	pMinGenome->m_fitness = fitness;
+	std::copy(fitnessData.begin(), fitnessData.end(), pMinGenome->m_fitness);
 
 	return true;
 }
@@ -196,4 +201,13 @@ void MinGAFactory::onSortedPopulation(const std::vector<mogal::GenomeWrapper> &p
 {
 	// This gets called each time the population is sorted. No
 	// implementation is necessary for the algorithm to work.
+}
+
+mogal::Genome *MinGAFactory::selectPreferredGenome(const std::list<mogal::Genome *> &bestGenomes) const
+{
+	// Todo: Implement logic
+	std::cout << "selecting ... " << bestGenomes.back()->getFitnessDescription() << std::endl;
+	return bestGenomes.back();
+	//setErrorString("Not implemented");
+	//return 0;
 }
