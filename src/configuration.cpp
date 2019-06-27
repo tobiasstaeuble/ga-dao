@@ -28,7 +28,8 @@ void Configuration::updateConfiguration(int L, int R, float time, float fitness)
 void Configuration::shuffleConfiguration() {
 	this->LL = (1.0*(rand()/(RAND_MAX + 1.0)))*BEAMLETS;
 	this->RL = LL + 1;
-	this->time = 1.0;
+	this->time += (rand() / double(RAND_MAX) - 0.5)*2;
+	this->time = (this->time < 0) ? 0 : this->time;
 	this->fitness = 0;
 	changed = true;
 }

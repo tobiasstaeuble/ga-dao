@@ -38,6 +38,7 @@ output/*
 # Bin directory contents
 bin/*
 !bin/CMakeLists.txt
+!bin/cleanup.sh
 
 # __pycache__
 visualization/__pycache__

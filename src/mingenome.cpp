@@ -25,8 +25,8 @@ MinGenome::MinGenome(MinGAFactory *pFactory)
 	for(int i = 0; i < NUM_ANGLES; i++) {
 		angles.push_back(Angle(i, 360/NUM_ANGLES*i));
 	}
-
 	m_pFactory = pFactory;
+	genomeChanged = true;
 }
 
 MinGenome::MinGenome(std::vector<Angle> angles, MinGAFactory *pFactory)
@@ -34,6 +34,7 @@ MinGenome::MinGenome(std::vector<Angle> angles, MinGAFactory *pFactory)
 	bixelweights.resize(BEAMLETS*NUM_ANGLES,1);
 	this->angles = angles;
 	m_pFactory = pFactory;
+	genomeChanged = true;
 }
 
 MinGenome::~MinGenome()
@@ -47,71 +48,76 @@ void MinGenome::setActiveFitnessComponent(int i)
 
 bool MinGenome::calculateFitness()
 {
-	for (int i = 0; i < NUM_ANGLES*BEAMLETS; ++i) 
+	if (genomeChanged)
 	{
-		bixelweights[i] = 0;
-	} 
-	
-	double tmp = 0;
-
-	for (int i = 0; i < NUM_ANGLES; ++i)
-	{
-		for (int j = 0; j < angles[i].configurations.size(); ++j) 
+		for (int i = 0; i < NUM_ANGLES*BEAMLETS; ++i) 
 		{
-			tmp += angles[i].configurations[j].time * 100;
-			for (int k = 0; k < BEAMLETS-1; ++k)
+			bixelweights[i] = 0;
+		} 
+		
+		double tmp = 0;
+
+		for (int i = 0; i < NUM_ANGLES; ++i)
+		{
+			for (int j = 0; j < angles[i].configurations.size(); ++j) 
 			{
-				if (angles[i].configurations[j].LL <= k && angles[i].configurations[j].RL > k) {
-					bixelweights[i*BEAMLETS + k] += angles[i].configurations[j].time;
-				}
+				tmp += angles[i].configurations[j].time * 1000;
+				for (int k = 0; k < BEAMLETS-1; ++k)
+				{
+					if (angles[i].configurations[j].LL <= k && angles[i].configurations[j].RL > k) {
+						bixelweights[i*BEAMLETS + k] += angles[i].configurations[j].time;
+					}
+				} 
+			}
+		}
+
+		
+		Map<MatrixXf> dijMatrix(*dij, DIJ_X, DIJ_Y);
+		//std::cout << dijMatrix << std::endl;
+		// std::cout << "dijMatrix: " << dijMatrix.size() << std::endl;
+		// std::cout << "bixlweights: " << bixelweights.size() << std::endl;
+
+		MatrixXf dose(DIM_X, DIM_Y);
+
+		dose = dijMatrix.transpose() * bixelweights;
+
+		Map<ArrayXf> dose2Array(dose.data(), dose.rows()*dose.cols());
+		
+		//writeToCSVFile("../problemset/newdosematrix.csv", dose2Array);
+
+		Map<MatrixXi> voi2Matrix(*voiData, DIM_X, DIM_Y);
+		Map<ArrayXi> voi2Array(voi2Matrix.data(), DIM_X*DIM_Y);
+
+		Map<ArrayXi> minDoseA(*minDose, DIJ_Y);
+		Map<ArrayXi> maxDoseA(*maxDose, DIJ_Y);
+
+		//writeToCSVFile("../problemset/minDoseMatrix.csv", minDoseA.cast<float>());
+		//writeToCSVFile("../problemset/voiAreaMatrix.csv", voi2Array.cast<float>());
+
+		//std::cout << minDoseA << std::endl;
+
+		int obj = 0;
+		//std::cout << dose2Array << std::endl;
+
+		for(int row = 0; row < DIJ_Y; ++row)
+		{
+			if (dose2Array(row) > maxDoseA(row))
+			{
+				obj += pow(dose2Array(row) - maxDoseA(row), 2) * OD_PEN * 1.0/voiWeights[voi2Array(row)];
+			}
+
+			if (minDoseA(row) > dose2Array(row))
+			{
+				obj += pow(dose2Array(row) - minDoseA(row), 2) * UD_PEN * 1.0/voiWeights[voi2Array(row)];
 			} 
 		}
+
+		//std::cout << "Obj value: " << obj << std::endl;
+		m_fitness[0] = obj;
+		m_fitness[1] = tmp;
 	}
-
 	
-	Map<MatrixXf> dijMatrix(*dij, DIJ_X, DIJ_Y);
-	//std::cout << dijMatrix << std::endl;
-	// std::cout << "dijMatrix: " << dijMatrix.size() << std::endl;
-	// std::cout << "bixlweights: " << bixelweights.size() << std::endl;
-
-	MatrixXf dose(DIM_X, DIM_Y);
-
-	dose = dijMatrix.transpose() * bixelweights;
-
-	Map<ArrayXf> dose2Array(dose.data(), dose.rows()*dose.cols());
-	
-	//writeToCSVFile("../problemset/newdosematrix.csv", dose2Array);
-
-	Map<MatrixXi> voi2Matrix(*voiData, DIM_X, DIM_Y);
-	Map<ArrayXi> voi2Array(voi2Matrix.data(), DIM_X*DIM_Y);
-
-	Map<ArrayXi> minDoseA(*minDose, DIJ_Y);
-	Map<ArrayXi> maxDoseA(*maxDose, DIJ_Y);
-
-	//writeToCSVFile("../problemset/minDoseMatrix.csv", minDoseA.cast<float>());
-	//writeToCSVFile("../problemset/voiAreaMatrix.csv", voi2Array.cast<float>());
-
-	//std::cout << minDoseA << std::endl;
-
-	int obj = 0;
-  	//std::cout << dose2Array << std::endl;
-
-	for(int row = 0; row < DIJ_Y; ++row)
-	{
-		if (dose2Array(row) > maxDoseA(row))
-		{
-			obj += pow(dose2Array(row) - maxDoseA(row), 2) * OD_PEN * 1.0/voiWeights[voi2Array(row)];
-		}
-
-		if (minDoseA(row) > dose2Array(row))
-		{
-			obj += pow(dose2Array(row) - minDoseA(row), 2) * UD_PEN * 1.0/voiWeights[voi2Array(row)];
-		} 
-	}
-
-	//std::cout << "Obj value: " << obj << std::endl;
-	m_fitness[0] = obj;
-	m_fitness[1] = obj-tmp;
+	genomeChanged = false;
 	return true;
 }
 
@@ -193,6 +199,7 @@ void MinGenome::mutate()
 			}
 		}
 	}
+	genomeChanged = true;
 }
 
 std::string MinGenome::getFitnessDescription() const

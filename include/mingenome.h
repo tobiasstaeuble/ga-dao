@@ -42,6 +42,7 @@ private:
 	int m_activeFitness;
 	MinGAFactory *m_pFactory;
 	std::vector<Angle> angles;
+	bool genomeChanged = false;
 	friend class MinGAFactory;
 
 };
