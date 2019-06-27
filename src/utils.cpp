@@ -22,6 +22,7 @@ void Utils::printAndSaveBestGenomes(mogal::Genome * bestGenome, int generation)
 	MinGenome *mGenome = (MinGenome *) bestGenome;
 	std::cout << "  " << bestGenome->getFitnessDescription() << std::endl;
 	std::cout << "  " << mGenome->getBixelweightsDescription() << std::endl;
+	std::cout << "  " << mGenome->getTimingDescription() << std::endl;
 	ostringstream out;
 	out << std::setw(5) << std::setfill('0') << std::to_string(generation);
 	mGenome->writeToCSVFile(OUTPUT_PATH + OUT_BW + "_" + out.str(), mGenome->getBixelweights());

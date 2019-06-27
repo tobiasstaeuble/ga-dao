@@ -19,9 +19,9 @@ const int UD_PEN				= 70;
 
 const int GENERATIONS			= 400;
 const int NUM_GENOMES			= 256;
-const float MUTATION_RATE		= 0.05;
-const float CROSSOVER_RATE		= 0.05;
-const float RESET_RATE			= 0.001;
+const float MUTATION_RATE		= 0.2;
+const float CROSSOVER_RATE		= 0.1;
+const float RESET_RATE			= 0.02;
 
 // forward-slash syntax should work on windows as well as on unix-systems
 const std::string INPUT_PATH	= "../problemset/";

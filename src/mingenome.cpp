@@ -59,9 +59,10 @@ bool MinGenome::calculateFitness()
 
 		for (int i = 0; i < NUM_ANGLES; ++i)
 		{
+			float totalAngleTime = 0;
 			for (int j = 0; j < angles[i].configurations.size(); ++j) 
 			{
-				tmp += angles[i].configurations[j].time * 1000;
+				totalAngleTime += angles[i].configurations[j].time;
 				for (int k = 0; k < BEAMLETS-1; ++k)
 				{
 					if (angles[i].configurations[j].LL <= k && angles[i].configurations[j].RL > k) {
@@ -69,9 +70,10 @@ bool MinGenome::calculateFitness()
 					}
 				} 
 			}
+			angles[i].totalTime = totalAngleTime;
+			tmp += totalAngleTime * 100;
 		}
 
-		
 		Map<MatrixXf> dijMatrix(*dij, DIJ_X, DIJ_Y);
 		//std::cout << dijMatrix << std::endl;
 		// std::cout << "dijMatrix: " << dijMatrix.size() << std::endl;
@@ -221,6 +223,20 @@ std::string MinGenome::getBixelweightsDescription() const
 
 	return std::string(output);
 }
+
+std::string MinGenome::getTimingDescription() const
+{
+	std::string output = "Total collimator time per angle: \n";
+
+	std::vector<float> timings;
+	for (Angle a : angles) 
+	{
+		output += std::to_string(a.totalTime) + ", ";
+	}
+
+	return std::string(output);
+}
+
 
 VectorXf MinGenome::getBixelweights() const
 {

@@ -18,12 +18,12 @@ set(MOGAL_LIBRARY "/usr/local/lib/libmogal.so")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}../lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}../lib)
 
-include_directories(../include)
+include_directories("${INCLUDE_DIRS}" ../include)
 file(GLOB SOURCES "../src/*.cpp")
 
 add_executable(ga-dao ${SOURCES})
 
-include_directories("${INCLUDE_DIRS}")
+
 target_link_libraries(ga-dao "${MOGAL_LIBRARY}")
 
 

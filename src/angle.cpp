@@ -17,6 +17,7 @@ Angle::Angle(int id, float deg) {
 		configurations[i].LL = 0;
 		configurations[i].RL = BEAMLETS-1;
 		configurations[i].time = 1;
+		configurations[i].parent = this;
 	}
 }
 

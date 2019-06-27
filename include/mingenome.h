@@ -32,6 +32,7 @@ public:
 
 	std::string getFitnessDescription() const;
 	std::string getBixelweightsDescription() const;
+	std::string getTimingDescription() const;
 	VectorXf getBixelweights() const;
 	std::vector<float> serializeAngles() const;
 

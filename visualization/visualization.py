@@ -27,7 +27,7 @@ pathDij 			= '..\\problemset\\dij.csv'
 pathVOI 			= '..\\problemset\\voi.csv'
 pathAngles 			= '..\\problemset\\resources\\angles.csv'
 #pathBixelweights 	= '..\\problemset\\bixelweights.csv'
-pathBixelweights 	= '..\\output\\bixelweights_00401'
+pathBixelweights 	= '..\\output\\bixelweights_00200'
 
 # load source files
 dataCT 				= np.genfromtxt(pathCT, delimiter=',')

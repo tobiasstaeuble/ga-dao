@@ -9,6 +9,8 @@
 using namespace Eigen;
 using namespace std;
 
+class Configuration;
+
 class Angle
 {
 public:
@@ -19,6 +21,7 @@ public:
 	int id;
 	float deg;
 	std::vector<Configuration> configurations;
+	float totalTime;
 
 private:
 

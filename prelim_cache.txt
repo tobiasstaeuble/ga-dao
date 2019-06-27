@@ -1,0 +1,8 @@
+settings: 0.05, 0.05, 0.001
+Fitness : 50328 9258.26
+
+settings: 0.1, 0.08, 0.01
+Fitness : 52543 6347.8
+
+settings: 0.2, 0.1, 0.02
+Fitness : 51374 7255.59

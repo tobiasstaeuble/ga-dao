@@ -3,9 +3,12 @@
 
 #include <Eigen/Dense>
 #include "constants.h"
+#include "angle.h"
 
 using namespace Eigen;
 using namespace std;
+
+class Angle;
 
 class Configuration
 {
@@ -21,6 +24,7 @@ public:
 	float time;
 	float fitness;
 	bool changed;
+	Angle *parent;
 
 private:
 
