@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
 
 	// does it make sense to make this static?
 	Utils util;
+	util.loadConfiguration();
 	util.loadData();
 	util.calculateRelativeWeights();
 	util.defineObjectives();
@@ -84,14 +85,19 @@ int main(int argc, char *argv[])
 
 		// finished calculation, get best genomes
 		std::list<mogal::Genome *> bestGenomes;
-
 		ga.getBestGenomes(bestGenomes);
-
 		std::list<mogal::Genome *>::const_iterator it;
 
-		ga.getBestGenomes(bestGenomes);
-		Utils::printAndSaveBestGenomes(bestGenomes.front(), ga.getCurrentGeneration());
-		Utils::saveDoseMatrix(bestGenomes.front(), ga.getCurrentGeneration());
+		if (OUTPUT_ON)
+		{
+			Utils::printAndSaveBestGenomes(bestGenomes.front(), ga.getCurrentGeneration());
+			Utils::saveDoseMatrix(bestGenomes.front(), ga.getCurrentGeneration());
+		}
+		
+		if (BATCH_ON)
+		{
+			Utils::saveResultBatchMode(bestGenomes);
+		}
 
 	} else {
 		std::cout << "Rank " << myRank << " starting..." << std::endl;

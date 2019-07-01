@@ -31,6 +31,7 @@ public:
 	void writeVectorToCSVFile(string name, std::vector<float> vec) const;
 
 	std::string getFitnessDescription() const;
+	std::string getFitness(int i) const;
 	std::string getBixelweightsDescription() const;
 	std::string getTimingDescription() const;
 	VectorXf getBixelweights() const;

@@ -212,6 +212,11 @@ std::string MinGenome::getFitnessDescription() const
 	return std::string(str);
 }
 
+std::string MinGenome::getFitness(int i) const
+{
+	return std::to_string(m_fitness[i]);
+}
+
 std::string MinGenome::getBixelweightsDescription() const
 {
 	std::string output = "Bixelweights: \n";

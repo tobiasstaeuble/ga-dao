@@ -160,26 +160,26 @@ void MinGAFactory::onGeneticAlgorithmStep(int generation, bool *generationInfoCh
 
 	getCurrentAlgorithm()->getBestGenomes(bestGenomes);
 
-	std::cout << "Generation " << generation << ": ";
-	
-	for (it = bestGenomes.begin() ; it != bestGenomes.end() ; it++)
+	if (TERMINAL_ON)
 	{
-		const mogal::Genome *pGenome = *it;
-
-		// recalculate Fitness again, because bixelweights vector again because:
-		// - bixelweights is not being exchanged between processes (it is derived)
-		// - no guarantee that calculateFitness is called before this onGeneticAlgorithmStep
-		// this can maybe be optimized..
-		MinGenome *pMinGenome = (MinGenome *)pGenome;
-		pMinGenome->calculateFitness();
-
-		std::cout << "  " << pGenome->getFitnessDescription() << std::endl;
+		std::cout << "Generation " << generation << ": \n";
+		for (it = bestGenomes.begin() ; it != bestGenomes.end() ; it++)
+		{
+			const mogal::Genome *pGenome = *it;
+			// recalculate fitness again because:
+			// - bixelweights is not being exchanged between processes (it is derived)
+			// - no guarantee that calculateFitness is called before this onGeneticAlgorithmStep
+			// this can maybe be optimized..
+			MinGenome *pMinGenome = (MinGenome *)pGenome;
+			pMinGenome->calculateFitness();
+			std::cout << "  " << pGenome->getFitnessDescription() << std::endl;
+		}
 	}
 
 	if (generation >= GENERATIONS)
 		*pStopAlgorithm = true;
 
-	if (generation % 10 == 0) {
+	if (generation % 10 == 0 && OUTPUT_ON) {
 		Utils::printAndSaveBestGenomes(bestGenomes.front(), generation);
 		Utils::saveDoseMatrix(bestGenomes.front(), generation);
 	}
