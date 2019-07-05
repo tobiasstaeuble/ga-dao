@@ -39,6 +39,7 @@ output/*
 bin/*
 !bin/CMakeLists.txt
 !bin/cleanup.sh
+!bin/runBatch.sh
 
 # __pycache__
 visualization/__pycache__
