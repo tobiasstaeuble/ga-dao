@@ -1,3 +1,4 @@
+#include <limits>
 #include "mingafactory.h"
 
 // Factory implementation
@@ -180,8 +181,8 @@ void MinGAFactory::onGeneticAlgorithmStep(int generation, bool *generationInfoCh
 		*pStopAlgorithm = true;
 
 	if (generation % 10 == 0 && OUTPUT_ON) {
-		Utils::printAndSaveBestGenomes(bestGenomes.front(), generation);
-		Utils::saveDoseMatrix(bestGenomes.front(), generation);
+		Utils::printAndSaveBestGenomes(selectPreferredGenome(bestGenomes), generation);
+		Utils::saveDoseMatrix(selectPreferredGenome(bestGenomes), generation);
 	}
 }
 
@@ -205,9 +206,25 @@ void MinGAFactory::onSortedPopulation(const std::vector<mogal::GenomeWrapper> &p
 
 mogal::Genome *MinGAFactory::selectPreferredGenome(const std::list<mogal::Genome *> &bestGenomes) const
 {
-	// Todo: Implement logic
-	std::cout << "selecting ... " << bestGenomes.back()->getFitnessDescription() << std::endl;
-	return bestGenomes.back();
-	//setErrorString("Not implemented");
-	//return 0;
+	// Getting preferred genome
+	// Because the two objectives are weighted, use the combined fitness value
+	float bestFitness = std::numeric_limits<float>::infinity();
+	mogal::Genome *bestGenome = bestGenomes.front();
+
+	std::list<mogal::Genome *>::const_iterator it;
+
+	for (it = bestGenomes.begin() ; it != bestGenomes.end() ; it++)
+	{
+		const mogal::Genome *pGenome = *it;
+		MinGenome *pMinGenome = (MinGenome *)pGenome;
+		//pMinGenome->calculateFitness();
+		float f = pMinGenome->getFitnessF(0) + pMinGenome->getFitnessF(1);
+		if (f < bestFitness)
+		{
+			bestFitness = f;
+			bestGenome = *it;
+		}
+	}
+	std::cout << "selecting genome with f-sum " << bestFitness << std::endl;
+	return bestGenome;
 }
