@@ -19,13 +19,13 @@
 #include "test.h"
 #include "utils.h"
 
-
+int myRank;
 
 int main(int argc, char *argv[])
 {
 
 	// MPI setup
-	int worldSize, myRank;
+	int worldSize;
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size( MPI_COMM_WORLD, &worldSize);
@@ -62,12 +62,19 @@ int main(int argc, char *argv[])
 
 	// algorithm and factory
 	mogal::MPIGeneticAlgorithm ga;
+	
+	// ga Params: 
+	// m_beta = 2.5 (selection presure)
+	// m_elitism = true
+	// m_alwaysIncludeBest = true
+	// m_crossoverRate = 0.9
+
+	mogal::GeneticAlgorithmParams gaParams(2.5, true, true, 0.9);
 	MinGAFactory gaFactory;
 
 	// time(0) is seconds since epoch, bad for MPI as we start all processes at same time
 	srand(time(0) + myRank);
 
-	// time(0) is in
 
 	// instantiate and init factoryparams
 	MinGAFactoryParams factoryParams;
@@ -77,7 +84,7 @@ int main(int argc, char *argv[])
 	if (myRank == 0)
 	{
 		std::cout << "Rank " << myRank << " starting..." << std::endl;
-		if (!ga.runMPI(gaFactory, NUM_GENOMES))
+		if (!ga.runMPI(gaFactory, NUM_GENOMES, &gaParams))
 		{
 			std::cerr << ga.getErrorString() << std::endl;
 			MPI_Abort(MPI_COMM_WORLD, -1);

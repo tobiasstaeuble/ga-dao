@@ -72,7 +72,7 @@ bool Utils::loadConfiguration()
         return 1;
     }
 
-	std::cout << "Config loaded from 'config.ini'" << "\n";
+	if (myRank == 0) std::cout << "Config loaded from 'config.ini'" << "\n";
 
 	GENERATIONS 		= reader.GetInteger("genome", "GENERATIONS", 400);
 	NUM_GENOMES 		= reader.GetInteger("genome", "NUM_GENOMES", 256);
@@ -91,7 +91,9 @@ bool Utils::loadConfiguration()
 	OUT_BW	        	= reader.Get("io", "OUT_BW", "UNKNOWN");
 	OUT_BATCH        	= reader.Get("io", "OUT_BATCH", "UNKNOWN");
 	OUTPUT_ON           = reader.GetBoolean("io", "OUTPUT_ON", true);
+	TERMINAL_ON        	= reader.GetBoolean("io", "TERMINAL_ON", true);
 	BATCH_ON	        = reader.GetBoolean("io", "BATCH_ON", false);
+	BATCH_NUM			= reader.GetInteger("io", "BATCH_NUM", 0);
 
 	WEIGHT_DOSE         = reader.GetReal("multiobjective", "WEIGHT_DOSE", 1.0);
 	WEIGHT_TIME         = reader.GetReal("multiobjective", "WEIGHT_TIME", 1.0);
@@ -102,7 +104,7 @@ bool Utils::loadConfiguration()
 bool Utils::loadData()
 {
 	// load data from csv (dij, vois)
-	std::cout << "Input: " << INPUT_PATH  << IN_DIJ << std::endl;
+	if (myRank == 0) std::cout << "Input: " << INPUT_PATH  << IN_DIJ << std::endl;
 	std::ifstream file(INPUT_PATH + IN_DIJ);
 
 	for(int row = 0; row < DIJ_X; ++row)
@@ -128,7 +130,6 @@ bool Utils::loadData()
 	
 	file.close();
 	file.clear();
-
 
 	file.open(INPUT_PATH + IN_VOI);
 	

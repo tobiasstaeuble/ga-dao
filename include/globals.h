@@ -12,6 +12,8 @@ extern int maxDose[DIM_Y][DIM_X];
 extern int voiWeights[VOIS];
 extern int voiData[DIM_Y][DIM_X];
 
+extern int myRank;
+
 // from config file
 extern int GENERATIONS;
 extern int NUM_GENOMES;

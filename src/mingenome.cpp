@@ -71,7 +71,7 @@ bool MinGenome::calculateFitness()
 				} 
 			}
 			angles[i].totalTime = totalAngleTime;
-			tmp += totalAngleTime * 100;
+			tmp += totalAngleTime;
 		}
 
 		Map<MatrixXf> dijMatrix(*dij, DIJ_X, DIJ_Y);
@@ -115,8 +115,8 @@ bool MinGenome::calculateFitness()
 		}
 
 		//std::cout << "Obj value: " << obj << std::endl;
-		m_fitness[0] = obj;
-		m_fitness[1] = tmp;
+		m_fitness[0] = obj * WEIGHT_DOSE;
+		m_fitness[1] = tmp * WEIGHT_TIME;
 	}
 	
 	genomeChanged = false;
