@@ -125,7 +125,7 @@ bool MinGAFactory::readGenome(serut::SerializationInterface &si, mogal::Genome *
 			//<< " / RL = " << static_cast<int>(angleData[i*NUM_CONFIGS*3+j*3+1]) << "/ T = " << angleData[i*NUM_CONFIGS*3+j*3+2] << std::endl;
 			nAngles[i].configurations[j].LL = static_cast<int>(angleData[i*NUM_CONFIGS*3+j*3]);
 			nAngles[i].configurations[j].RL = static_cast<int>(angleData[i*NUM_CONFIGS*3+j*3+1]);
-			nAngles[i].configurations[j].time = angleData[i*NUM_CONFIGS*3+j*3+2];
+			nAngles[i].configurations[j].leafTime = angleData[i*NUM_CONFIGS*3+j*3+2];
 			nAngles[i].gaFactory = (MinGAFactory *)this;
 		}
 	}

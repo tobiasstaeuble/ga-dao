@@ -18,12 +18,12 @@ public:
 	Configuration(int LL, int RL);
 	Configuration();
 
-	void updateConfiguration(int LL, int RL, double time);
-	void updateConfiguration(int LL, int RL, double time, double fitness);
+	void updateConfiguration(int LL, int RL, double leafTime);
+	void updateConfiguration(int LL, int RL, double leafTime, double fitness);
 	void shuffleConfiguration();
 
 	int LL, RL;
-	double time;
+	double leafTime;
 	double fitness;
 	bool changed;
 	Angle *parent;

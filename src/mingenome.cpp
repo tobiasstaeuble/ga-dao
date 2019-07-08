@@ -63,11 +63,11 @@ bool MinGenome::calculateFitness()
 			double totalAngleTime = 0;
 			for (int j = 0; j < angles[i].configurations.size(); ++j) 
 			{
-				totalAngleTime += angles[i].configurations[j].time;
+				totalAngleTime += angles[i].configurations[j].leafTime;
 				for (int k = 0; k < BEAMLETS-1; ++k)
 				{
 					if (angles[i].configurations[j].LL <= k && angles[i].configurations[j].RL > k) {
-						bixelweights[i*BEAMLETS + k] += angles[i].configurations[j].time;
+						bixelweights[i*BEAMLETS + k] += angles[i].configurations[j].leafTime;
 					}
 				} 
 			}
@@ -157,11 +157,11 @@ mogal::Genome *MinGenome::reproduce(const mogal::Genome *pGenome) const
 				{
 					nAngles[i].configurations[j].LL = pMinGenome->angles[i].configurations[j].LL;
 					nAngles[i].configurations[j].RL = pMinGenome->angles[i].configurations[j].RL;
-					nAngles[i].configurations[j].time = pMinGenome->angles[i].configurations[j].time;
+					nAngles[i].configurations[j].leafTime = pMinGenome->angles[i].configurations[j].leafTime;
 				} else {
 					nAngles[i].configurations[j].LL = angles[i].configurations[j].LL;
 					nAngles[i].configurations[j].RL = angles[i].configurations[j].RL;
-					nAngles[i].configurations[j].time = angles[i].configurations[j].time;
+					nAngles[i].configurations[j].leafTime = angles[i].configurations[j].leafTime;
 				}
 			}
 		}
@@ -186,6 +186,11 @@ mogal::Genome *MinGenome::reproduce(const mogal::Genome *pGenome) const
 mogal::Genome *MinGenome::clone() const
 {
 	MinGenome *pNewGenome = new MinGenome(angles, m_pFactory);
+
+	//std::cout << "cloning.." << std::endl;
+
+	//std::cout << "orig angle 1 config 1 leaftime" << angles[1].configurations[1].leafTime << std::endl;
+	//std::cout << "new angle 1 config 1 leaftime" << pNewGenome->angles[1].configurations[1].leafTime << std::endl;
 
 	pNewGenome->m_fitness[0] = m_fitness[0];
 	pNewGenome->m_fitness[1] = m_fitness[1];
@@ -273,7 +278,7 @@ std::vector<double> MinGenome::serializeAngles() const
 		{
 			sAngles[i*NUM_CONFIGS*3+j*3] = angles[i].configurations[j].LL;
 			sAngles[i*NUM_CONFIGS*3+j*3+1] = angles[i].configurations[j].RL;
-			sAngles[i*NUM_CONFIGS*3+j*3+2] = angles[i].configurations[j].time;
+			sAngles[i*NUM_CONFIGS*3+j*3+2] = angles[i].configurations[j].leafTime;
 		}
 	}
 	//for (auto i: sAngles)

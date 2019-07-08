@@ -27,7 +27,7 @@ pathDij 			= '..\\problemset\\dij.csv'
 pathVOI 			= '..\\problemset\\voi.csv'
 pathAngles 			= '..\\problemset\\resources\\angles.csv'
 #pathBixelweights 	= '..\\problemset\\bixelweights.csv'
-pathBixelweights 	= '..\\output\\bixelweights_00200'
+pathBixelweights 	= '..\\output\\bixelweights_01001'
 
 # load source files
 dataCT 				= np.genfromtxt(pathCT, delimiter=',')
@@ -39,11 +39,11 @@ dataBixelweights 	= np.genfromtxt(pathBixelweights, delimiter=',')
 print(dataBixelweights);
 
 # display ct image
-plt.imshow(dataCT, interpolation='none', cmap='gray')
-print(np.shape(dataVOI))
+#plt.imshow(dataCT, interpolation='none', cmap='gray')
+#print(np.shape(dataVOI))
 
 # overlay vois
-plt.contour(dataVOI, cmap='jet')
+# plt.contour(dataVOI, cmap='jet')
 
 # display Dij
 # Dij = np.sum(dataDij, 0)
@@ -54,9 +54,12 @@ plt.contour(dataVOI, cmap='jet')
 dose = np.dot(np.matrix.transpose(dataDij),np.matrix.transpose(dataBixelweights))
 dose = np.reshape(dose, np.shape(dataCT)[::-1])
 dose = np.transpose(dose)
-maskedDose = np.ma.masked_where(dose < 1, dose) # mask dose for transparency reasons
+print(dose)
+#maskedDose = np.ma.masked_where(dose < 0, dose) # mask dose for transparency reasons
 
-plt.imshow(maskedDose, cmap='jet', interpolation='none', alpha=0.5)
+plt.imshow(dose, cmap='jet', interpolation='none', alpha=0.5)
+
+#plt.imshow(maskedDose, cmap='jet', interpolation='none', alpha=0.5)
 #plt.contourf(maskedDose, cmap='jet', interpolation='none', alpha=0.4)
 
 plt.show()
