@@ -12,6 +12,7 @@ using namespace Eigen;
 using namespace std;
 
 class MinGAFactory;
+class Angle;
 
 
 class MinGenome : public mogal::Genome
@@ -28,15 +29,15 @@ public:
 	mogal::Genome *clone() const;
 	void mutate();
 	void writeToCSVFile(string name, MatrixXf matrix);
-	void writeVectorToCSVFile(string name, std::vector<float> vec) const;
+	void writeVectorToCSVFile(string name, std::vector<double> vec) const;
 
 	std::string getFitnessDescription() const;
 	std::string getFitness(int i) const;
-	float getFitnessF(int i) const;
+	double getFitnessF(int i) const;
 	std::string getBixelweightsDescription() const;
 	std::string getTimingDescription() const;
 	VectorXf getBixelweights() const;
-	std::vector<float> serializeAngles() const;
+	std::vector<double> serializeAngles() const;
 
 private:
 	int beamlets;

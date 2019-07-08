@@ -97,8 +97,8 @@ int main(int argc, char *argv[])
 
 		if (OUTPUT_ON)
 		{
-			Utils::printAndSaveBestGenomes(bestGenomes.front(), ga.getCurrentGeneration());
-			Utils::saveDoseMatrix(bestGenomes.front(), ga.getCurrentGeneration());
+			Utils::printAndSaveBestGenomes(gaFactory.selectPreferredGenome(bestGenomes),  ga.getCurrentGeneration());
+			Utils::saveDoseMatrix(gaFactory.selectPreferredGenome(bestGenomes),  ga.getCurrentGeneration());
 		}
 		
 		if (BATCH_ON)

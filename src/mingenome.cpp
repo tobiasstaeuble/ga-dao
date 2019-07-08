@@ -1,6 +1,7 @@
 #include <mogal/gafactorysingleobjective.h>
 #include <mogal/genome.h>
 #include <mogal/geneticalgorithm.h>
+#include <mogal/randomnumbergenerator.h>
 #include <serut/serializationinterface.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,19 +22,19 @@ using namespace std;
 
 MinGenome::MinGenome(MinGAFactory *pFactory)
 {
+	m_pFactory = pFactory;
 	bixelweights.resize(BEAMLETS*NUM_ANGLES,1);
 	for(int i = 0; i < NUM_ANGLES; i++) {
-		angles.push_back(Angle(i, 360/NUM_ANGLES*i));
+		angles.push_back(Angle(i, 360/NUM_ANGLES*i, pFactory));
 	}
-	m_pFactory = pFactory;
 	genomeChanged = true;
 }
 
 MinGenome::MinGenome(std::vector<Angle> angles, MinGAFactory *pFactory)
 {
+	m_pFactory = pFactory;
 	bixelweights.resize(BEAMLETS*NUM_ANGLES,1);
 	this->angles = angles;
-	m_pFactory = pFactory;
 	genomeChanged = true;
 }
 
@@ -59,7 +60,7 @@ bool MinGenome::calculateFitness()
 
 		for (int i = 0; i < NUM_ANGLES; ++i)
 		{
-			float totalAngleTime = 0;
+			double totalAngleTime = 0;
 			for (int j = 0; j < angles[i].configurations.size(); ++j) 
 			{
 				totalAngleTime += angles[i].configurations[j].time;
@@ -134,12 +135,15 @@ bool MinGenome::isFitterThan(const mogal::Genome *pGenome) const
 
 mogal::Genome *MinGenome::reproduce(const mogal::Genome *pGenome) const
 {
-	double randomNumber = (1.0*((double)rand()/(RAND_MAX + 1.0)));
+	double randomNumber = m_pFactory->getRandomNumberGenerator()->pickRandomNumber();
 	const MinGenome *pMinGenome = (const MinGenome *)pGenome;
 	MinGenome *pNewGenome = 0;
 	
 	std::vector<Angle> nAngles;
-	nAngles.resize(NUM_ANGLES);
+
+	for(int i = 0; i < NUM_ANGLES; i++) {
+		nAngles.push_back(Angle(i, 360/NUM_ANGLES*i, m_pFactory));
+	}
 
 	// crossover
 	if (randomNumber < CROSSOVER_RATE) {
@@ -147,7 +151,7 @@ mogal::Genome *MinGenome::reproduce(const mogal::Genome *pGenome) const
 		{
 			for (int j = 0; j < NUM_CONFIGS; ++j) 
 			{
-				double rng = (1.0*((double)rand()/(RAND_MAX + 1.0)));
+				double rng = m_pFactory->getRandomNumberGenerator()->pickRandomNumber();
 				// 50-50
 				if (rng < 0.5)
 				{
@@ -165,11 +169,17 @@ mogal::Genome *MinGenome::reproduce(const mogal::Genome *pGenome) const
 	}
 
 	// reset
-	else if (randomNumber > 1-RESET_RATE)
+	else if (randomNumber > 1-RESET_RATE) 
+	{
 		pNewGenome = new MinGenome(m_pFactory);
-	// change nothing
+	}
+		
+	// change nothing / no breeding
 	else 
+	{
 		pNewGenome = new MinGenome(angles, m_pFactory);
+	}
+		
 	return pNewGenome;
 }
 
@@ -184,7 +194,7 @@ mogal::Genome *MinGenome::clone() const
 
 void MinGenome::mutate()
 { 
-	float randomNumber = (1.0*(rand()/(RAND_MAX + 1.0))); // do mutate or do not mutate (0-1 exclusive)
+	double randomNumber = m_pFactory->getRandomNumberGenerator()->pickRandomNumber(); // do mutate or do not mutate (0-1 exclusive)
 
 	// mutation
 	if (randomNumber < MUTATION_RATE)
@@ -193,9 +203,9 @@ void MinGenome::mutate()
 		{
 			for (int j = 0; j < angles[i].configurations.size(); j++)
 			{
-				float smallRandomNumber = (rand() / double(RAND_MAX) - 0.5)*2; // -1 exclusive to +1 exclusive
-				smallRandomNumber /= 1; // /=5
-				if (smallRandomNumber < 1) {
+				double sRandomNumber = (m_pFactory->getRandomNumberGenerator()->pickRandomNumber() - 0.5)*2; // -1 exclusive to +1 exclusive
+				
+				if (sRandomNumber < 1) {
 					angles[i].configurations[j].shuffleConfiguration();
 				}
 			}
@@ -217,7 +227,7 @@ std::string MinGenome::getFitness(int i) const
 	return std::to_string(m_fitness[i]);
 }
 
-float MinGenome::getFitnessF(int i) const
+double MinGenome::getFitnessF(int i) const
 {
 	return m_fitness[i];
 }
@@ -226,7 +236,7 @@ std::string MinGenome::getBixelweightsDescription() const
 {
 	std::string output = "Bixelweights: \n";
 
-	for (float b : bixelweights) 
+	for (double b : bixelweights) 
 	{
 		output += std::to_string(b) + ", ";
 	}
@@ -238,7 +248,7 @@ std::string MinGenome::getTimingDescription() const
 {
 	std::string output = "Total collimator time per angle: \n";
 
-	std::vector<float> timings;
+	std::vector<double> timings;
 	for (Angle a : angles) 
 	{
 		output += std::to_string(a.totalTime) + ", ";
@@ -253,9 +263,9 @@ VectorXf MinGenome::getBixelweights() const
 	return bixelweights;
 }
 
-std::vector<float> MinGenome::serializeAngles() const
+std::vector<double> MinGenome::serializeAngles() const
 {
-	std::vector<float> sAngles(m_pFactory->getMaximalGenomeSize()/sizeof(float));
+	std::vector<double> sAngles(m_pFactory->getMaximalGenomeSize()/sizeof(double));
 
 	for (int i = 0; i < NUM_ANGLES; i++) 
 	{
@@ -281,9 +291,9 @@ void MinGenome::writeToCSVFile(string name, MatrixXf matrix)
     file << matrix.format(CSVFormat);
 }
 
-void MinGenome::writeVectorToCSVFile(string name, std::vector<float> vec) const
+void MinGenome::writeVectorToCSVFile(string name, std::vector<double> vec) const
 {
 	std::ofstream FILE(name, std::ios::out | std::ofstream::binary);
-    std::ostream_iterator<float> osi{FILE," "};
+    std::ostream_iterator<double> osi{FILE," "};
     std::copy(vec.begin(), vec.end(), osi);
 }

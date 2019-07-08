@@ -13,7 +13,7 @@ public:
 	bool write(serut::SerializationInterface &si) const;
 	bool read(serut::SerializationInterface &si);
 
-	float *dij;
+	double *dij;
 	int *minDose;
 	int *maxDose;
 };

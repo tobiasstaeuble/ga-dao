@@ -2,26 +2,43 @@
 #include "constants.h"
 #include <iostream>
 
-Angle::Angle() {
+Angle::Angle(MinGAFactory *factory) {
+	this->gaFactory = factory;
 	configurations.resize(NUM_CONFIGS);
+
+	for (int i = 0; i < configurations.size(); ++i)
+	{
+		configurations[i].gaFactory = factory;
+		configurations[i].parent = (Angle *)this;
+		configurations[i].shuffleConfiguration();
+	}
 }
 
-Angle::Angle(int id, float deg) {
+Angle::Angle(int id, double deg, MinGAFactory *factory) {
 	this->id = id;
+	this->gaFactory = factory;
 	this->deg = deg;
 
 	configurations.resize(NUM_CONFIGS);
 
 	for (int i = 0; i < configurations.size(); ++i)
 	{
-		configurations[i].LL = 0;
-		configurations[i].RL = BEAMLETS-1;
-		configurations[i].time = 1;
-		configurations[i].parent = this;
+		configurations[i].gaFactory = factory;
+		configurations[i].parent = (Angle *)this;
+		configurations[i].shuffleConfiguration();
 	}
 }
 
-Angle::Angle(int id) {
+Angle::Angle(int id, MinGAFactory *factory) {
 	this->id = id;
+	this->gaFactory = factory;
 	configurations.resize(NUM_CONFIGS);
+
+	for (int i = 0; i < configurations.size(); ++i)
+	{
+		configurations[i].gaFactory = factory;
+		configurations[i].parent = (Angle *)this;
+		configurations[i].shuffleConfiguration();
+
+	}
 }

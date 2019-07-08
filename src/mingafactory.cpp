@@ -33,7 +33,7 @@ mogal::Genome *MinGAFactory::createNewGenome() const
 	std::vector<Angle> angles;
 
 	for(int i = 0; i < NUM_ANGLES; i++) {
-		angles.push_back(Angle(i, 360/NUM_ANGLES*i));
+		angles.push_back(Angle(i, 360/NUM_ANGLES*i, (MinGAFactory *)this));
 	}
 	return new MinGenome(angles, (MinGAFactory *)this);
 
@@ -41,7 +41,7 @@ mogal::Genome *MinGAFactory::createNewGenome() const
 
 size_t MinGAFactory::getMaximalGenomeSize() const
 {
-	return sizeof(float)*NUM_CONFIGS*NUM_ANGLES*3; // for angles matrix
+	return sizeof(double)*NUM_CONFIGS*NUM_ANGLES*3; // for angles matrix
 
 	// This function is only needed if you'll be using distributed calculation.
 	// In that case, it should return the maximum number of bytes a genome will
@@ -68,9 +68,9 @@ bool MinGAFactory::writeGenome(serut::SerializationInterface &si, const mogal::G
 	// This is only needed for distributed calculation
 	const MinGenome *pMinGenome = (const MinGenome *)pGenome;	
 
-	std::vector<float> angleData = pMinGenome->serializeAngles();
+	std::vector<double> angleData = pMinGenome->serializeAngles();
 
-	if (!si.writeFloats(angleData))
+	if (!si.writeDoubles(angleData))
 	{
 		setErrorString("Couldn't write genome data");
 		return false;
@@ -103,27 +103,30 @@ bool MinGAFactory::readGenome(serut::SerializationInterface &si, mogal::Genome *
 {
 
 	// This is only needed for distributed calculation
-	std::vector<float> angleData(getMaximalGenomeSize()/sizeof(float));
-	if (!si.readFloats(angleData))
+	std::vector<double> angleData(getMaximalGenomeSize()/sizeof(double));
+	if (!si.readDoubles(angleData))
 	{
 		setErrorString("Couldn't read genome data");
 		return false;
 	}
-	float* ptr = &angleData[0];
+	double* ptr = &angleData[0];
 
 	// deserialize angle data
 	std::vector<Angle> nAngles;
-	nAngles.resize(NUM_ANGLES);
+	nAngles.resize(NUM_ANGLES, Angle((MinGAFactory *)this));
 	//std::cout << "reading: " << std::endl;
 	//for (auto i: angleData)
  	//	std::cout << i << ' ';
 	for (int i = 0; i < NUM_ANGLES; i++) 
 	{
 		for (int j = 0; j < NUM_CONFIGS; j++)
-		{
+		{	
+			//std::cout << "i/j = " << i << "/" << j << ": LL = " << static_cast<int>(angleData[i*NUM_CONFIGS*3+j*3])
+			//<< " / RL = " << static_cast<int>(angleData[i*NUM_CONFIGS*3+j*3+1]) << "/ T = " << angleData[i*NUM_CONFIGS*3+j*3+2] << std::endl;
 			nAngles[i].configurations[j].LL = static_cast<int>(angleData[i*NUM_CONFIGS*3+j*3]);
 			nAngles[i].configurations[j].RL = static_cast<int>(angleData[i*NUM_CONFIGS*3+j*3+1]);
 			nAngles[i].configurations[j].time = angleData[i*NUM_CONFIGS*3+j*3+2];
+			nAngles[i].gaFactory = (MinGAFactory *)this;
 		}
 	}
 	*pGenome = new MinGenome(nAngles, (MinGAFactory *)this);
@@ -208,7 +211,7 @@ mogal::Genome *MinGAFactory::selectPreferredGenome(const std::list<mogal::Genome
 {
 	// Getting preferred genome
 	// Because the two objectives are weighted, use the combined fitness value
-	float bestFitness = std::numeric_limits<float>::infinity();
+	double bestFitness = std::numeric_limits<double>::infinity();
 	mogal::Genome *bestGenome = bestGenomes.front();
 
 	std::list<mogal::Genome *>::const_iterator it;
@@ -218,7 +221,7 @@ mogal::Genome *MinGAFactory::selectPreferredGenome(const std::list<mogal::Genome
 		const mogal::Genome *pGenome = *it;
 		MinGenome *pMinGenome = (MinGenome *)pGenome;
 		//pMinGenome->calculateFitness();
-		float f = pMinGenome->getFitnessF(0) + pMinGenome->getFitnessF(1);
+		double f = pMinGenome->getFitnessF(0) + pMinGenome->getFitnessF(1);
 		if (f < bestFitness)
 		{
 			bestFitness = f;
