@@ -36,8 +36,8 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
 ```
 git clone <this repository>
 cd ga-dao
-git submodule update --init --recursive (clone Eigen)
 ```
+~~git submodule update --init --recursive (clone Eigen)~~ no longer necessary
 
 ## Running ga-dao
 ```
