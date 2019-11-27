@@ -88,8 +88,12 @@ def animate(i):
 	#dose_imb.set_array(dose_bw)
 	#dose_imb.autoscale()
 
+Writer = anim.writers['ffmpeg']
+writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
 
-anim = anim.FuncAnimation(fig, animate, frames=len(relevantFilesDose), interval=300, repeat=False)
+anim = anim.FuncAnimation(fig, animate, frames=len(relevantFilesDose), interval=50, repeat=False)
+anim.save('tmp.mp4', writer=writer)
+
 #dataMinDoseMatrix = np.transpose(np.reshape(dataMinDoseMatrix, np.shape(dataCT)[::-1]))
 #dataVOIMatrix = np.transpose(np.reshape(dataVOIMatrix, np.shape(dataCT)[::-1]))
 
